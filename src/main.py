@@ -26,14 +26,16 @@ quad = Quad(store.get('quad'), MouseHandler('input'), updateStorage)
 outputRes = 480
 outputSize = (outputRes, outputRes)
 squarePoints = ((0, 0), (outputRes, 0), (0, outputRes), (outputRes, outputRes))
-lowerRed = np.array([145,100,20])
-upperRed = np.array([195,180,250])
-#lowerRed = np.array([100,60,20])
-#upperRed = np.array([130,180,250])
-kernel = np.ones((10, 10),np.uint8)
+lowerRed = np.array([145, 100, 20])
+upperRed = np.array([195, 180, 250])
+#lowerRed = np.array([100, 60, 20])
+#upperRed = np.array([130, 180, 250])
+kernel = np.ones((10, 10), np.uint8)
+
 
 def printColor(x, y):
     print(hsv[y][x])
+
 
 MouseHandler('output').onMouseDown = printColor
 
@@ -46,7 +48,7 @@ while True:
 
     hsv = cv.cvtColor(output, cv.COLOR_BGR2HSV)
     filtered = cv.inRange(hsv, lowerRed, upperRed)
-    filtered = cv.dilate(filtered, kernel, iterations = 1)
+    filtered = cv.dilate(filtered, kernel, iterations=1)
     cv.imshow('filtered', filtered)
 
     quad.update(frame)
