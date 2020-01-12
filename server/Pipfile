@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 opencv-python = "*"
+websockets = "*"
 
 [dev-packages]
 yapf = "*"
