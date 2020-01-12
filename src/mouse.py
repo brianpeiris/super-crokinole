@@ -5,7 +5,8 @@ class MouseHandler:
     def __init__(self, window):
         self.state = [0, 0, 0]
         self.onMouseDown = None
-        cv.setMouseCallback(window, self.onMouse)
+        if window:
+            cv.setMouseCallback(window, self.onMouse)
 
     def onMouse(self, event, x, y, flags, param):
         if event == cv.EVENT_MOUSEMOVE:
