@@ -11,8 +11,11 @@ cv.namedWindow('output', cv.WINDOW_GUI_NORMAL | cv.WINDOW_AUTOSIZE)
 capture = cv.VideoCapture(4)
 
 store = Store('store.json')
+
+
 def updateStorage():
     store.put('quad', quad.getPoints())
+
 
 mouseHandler = MouseHandler('input')
 quad = Quad(store.get('quad'), mouseHandler, updateStorage)
