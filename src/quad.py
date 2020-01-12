@@ -2,7 +2,7 @@ import cv2 as cv
 
 
 class Draggable:
-    def __init__(self, name, mouseHandler, pos, dragEndCallback=None):
+    def __init__(self, name, mouseHandler, pos, dragEndCallback):
         self.pos = pos
         self.dragging = False
         self.dragEndCallback = dragEndCallback
@@ -18,8 +18,7 @@ class Draggable:
         if self.dragging:
             if button == 0:
                 self.dragging = False
-                if self.dragEndCallback is not None:
-                    self.dragEndCallback()
+                self.dragEndCallback()
         else:
             if hit and button == 1:
                 self.dragOffset = (mx - x, my - y)
@@ -42,11 +41,16 @@ class Draggable:
 
 
 class Quad:
-    def __init__(self, mouseHandler):
-        self.tl = Draggable('TL', mouseHandler, (10, 10))
-        self.tr = Draggable('TR', mouseHandler, (100, 10))
-        self.bl = Draggable('BL', mouseHandler, (10, 100))
-        self.br = Draggable('BR', mouseHandler, (100, 100))
+    def __init__(self, points, mouseHandler, changeEndCallback):
+        self.changeEndCallback = changeEndCallback
+
+        if points is None:
+            points = ((10, 10), (100, 10), (10, 100), (100, 100))
+
+        self.tl = Draggable('TL', mouseHandler, tuple(points[0]), self.onDragEnd)
+        self.tr = Draggable('TR', mouseHandler, tuple(points[1]), self.onDragEnd)
+        self.bl = Draggable('BL', mouseHandler, tuple(points[2]), self.onDragEnd)
+        self.br = Draggable('BR', mouseHandler, tuple(points[3]), self.onDragEnd)
 
     def update(self, dst):
         blue = (255, 0, 0)
@@ -58,6 +62,9 @@ class Quad:
         self.tr.update(dst)
         self.bl.update(dst)
         self.br.update(dst)
+
+    def onDragEnd(self):
+        self.changeEndCallback()
 
     def getPoints(self):
         return (self.tl.pos, self.tr.pos, self.bl.pos, self.br.pos)

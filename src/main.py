@@ -3,16 +3,21 @@ import numpy as np
 
 from mouse import MouseHandler
 from quad import Quad
+from store import Store
 
 cv.namedWindow('input', cv.WINDOW_GUI_NORMAL | cv.WINDOW_AUTOSIZE)
 cv.namedWindow('output', cv.WINDOW_GUI_NORMAL | cv.WINDOW_AUTOSIZE)
 
 capture = cv.VideoCapture(4)
 
+store = Store('store.json')
+def updateStorage():
+    store.put('quad', quad.getPoints())
+
 mouseHandler = MouseHandler('input')
-quad = Quad(mouseHandler)
+quad = Quad(store.get('quad'), mouseHandler, updateStorage)
 outputRes = 480
-outputSize = (480, 480)
+outputSize = (outputRes, outputRes)
 squarePoints = ((0, 0), (outputRes, 0), (0, outputRes), (outputRes, outputRes))
 
 while True:
