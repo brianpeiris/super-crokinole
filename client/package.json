@@ -4,5 +4,9 @@
   },
   "devDependencies": {
     "browser-sync": "^2.26.7"
+  },
+  "dependencies": {
+    "pixi-projection": "^0.3.6",
+    "pixi.js": "^5.2.0"
   }
 }

@@ -10,7 +10,7 @@ from store import Store
 
 store = Store('store.json')
 
-debug = False
+debug = True
 
 if debug:
     cv.namedWindow('input', cv.WINDOW_GUI_NORMAL | cv.WINDOW_AUTOSIZE)
@@ -20,7 +20,7 @@ if debug:
     cv.namedWindow('filtered', cv.WINDOW_GUI_NORMAL | cv.WINDOW_AUTOSIZE)
     cv.moveWindow('filtered', 1250, 500)
 
-capture = cv.VideoCapture(4)
+capture = cv.VideoCapture(5)
 
 
 def updateStorage():
