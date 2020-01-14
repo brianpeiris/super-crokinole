@@ -10,7 +10,7 @@ from store import Store
 
 store = Store('store.json')
 
-debug = True
+debug = False
 
 if debug:
     cv.namedWindow('input', cv.WINDOW_GUI_NORMAL | cv.WINDOW_AUTOSIZE)
