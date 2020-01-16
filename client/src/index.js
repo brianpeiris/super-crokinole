@@ -2,33 +2,89 @@ import Quad from "./quad.js";
 
 let keypoints = [];
 const socket = new WebSocket("ws://localhost:8282");
+let lastMessageTime = 0;
+const interpolate = false;
 socket.onmessage = event => {
-  keypoints = JSON.parse(event.data);
+  const rawKeypoints = JSON.parse(event.data);
+  if (interpolate) {
+  const delta = Date.now() - lastMessageTime;
+  for (let i = 0; i < rawKeypoints.length; i++) {
+    const rawKeypoint = rawKeypoints[i];
+    if (keypoints[i]) {
+      const kp = keypoints[i];
+      kp.vx = (rawKeypoint[0] - kp.x) / delta;
+      kp.vy = (rawKeypoint[1] - kp.y) / delta;
+      kp.s = rawKeypoint[2];
+    } else {
+      keypoints[i] = {
+        x: rawKeypoint[0],
+        y: rawKeypoint[1],
+        vx: 0,
+        vy: 0,
+        s: rawKeypoint[2]
+      };
+    }
+    lastMessageTime = Date.now();
+  }} else {
+    keypoints = rawKeypoints.map(kp => ({
+      x: kp[0],
+      y: kp[1],
+      vx: 0,
+      vy: 0,
+    }));
+  }
 };
 
-const ctx = canvas.getContext("2d");
-const testSquare = { pos: { x: 0, y: 0 }, vel: { x: 5 + Math.random() * 5, y: 5 + Math.random() * 5 } };
+// prettier-ignore
+const debugKeypoints = [
+  [[50, 50, 20]],
+  [[150, 150, 20]],
+  [[200, 200, 20]],
+  [[200, 200, 20]],
+];
 
-requestAnimationFrame(function loop() {
+let debugKeypointIndex = 0;
+//socket.onmessage({ data: JSON.stringify(debugKeypoints[debugKeypointIndex]) });
+/*
+setInterval(() => {
+  if (debugKeypointIndex === 0) {
+    lastMessageTime = 0;
+    keypoints = [];
+  }
+  socket.onmessage({ data: JSON.stringify(debugKeypoints[debugKeypointIndex]) });
+  debugKeypointIndex = (debugKeypointIndex + 1) % debugKeypoints.length;
+}, 1000);
+//*/
+
+const ctx = canvas.getContext("2d");
+
+let lastFrameTime = 0;
+requestAnimationFrame(function loop(time) {
   requestAnimationFrame(loop);
 
-  ctx.fillStyle = "white";
+  ctx.fillStyle = "black";
   ctx.fillRect(0, 0, 480, 480);
 
-  ctx.fillStyle = "black";
-  testSquare.pos.x += testSquare.vel.x;
-  testSquare.pos.y += testSquare.vel.y;
-  ctx.fillRect(testSquare.pos.x - 10, testSquare.pos.y - 10, 20, 20);
-  if (testSquare.pos.x < 0 || testSquare.pos.x > 480) testSquare.vel.x *= -1;
-  if (testSquare.pos.y < 0 || testSquare.pos.y > 480) testSquare.vel.y *= -1;
+  const delta = time - lastFrameTime;
 
   for (const keypoint of keypoints) {
-    const [x, y, s] = keypoint;
+    keypoint.x += keypoint.vx * delta;
+    keypoint.y += keypoint.vy * delta;
+    const { x, y, s } = keypoint;
+
+    ctx.fillStyle = "green";
     ctx.beginPath();
-    ctx.ellipse(x, y, s, s, 0, 0, Math.PI * 2);
+    ctx.ellipse(x, y, 40, 40, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.closePath();
+
+    ctx.fillStyle = "black";
+    ctx.beginPath();
+    ctx.ellipse(x, y, 30, 30, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.closePath();
   }
+  lastFrameTime = time;
 });
 
 const app = new PIXI.Application({ resizeTo: window });
