@@ -21,6 +21,7 @@ if debug:
     cv.moveWindow('filtered', 1250, 500)
 
 capture = cv.VideoCapture(4)
+capture.set(cv.CAP_PROP_AUTO_WB, False)
 
 
 def updateStorage():
@@ -32,8 +33,8 @@ quad = Quad(store.get('quad'), MouseHandler(debug and 'input'), updateStorage)
 outputRes = 480
 outputSize = (outputRes, outputRes)
 squarePoints = ((0, 0), (outputRes, 0), (0, outputRes), (outputRes, outputRes))
-lowerRed = np.array([145, 100, 20])
-upperRed = np.array([195, 180, 250])
+lowerRed = np.array([2, 200, 140])
+upperRed = np.array([15, 256, 220])
 #lowerRed = np.array([100, 60, 20])
 #upperRed = np.array([130, 180, 250])
 kernel = np.ones((10, 10), np.uint8)
@@ -48,9 +49,11 @@ MouseHandler(debug and 'output').onMouseDown = printColor
 params = cv.SimpleBlobDetector_Params()
 params.minArea = 100
 detector = cv.SimpleBlobDetector_create(params)
+hsv = None
 
 
 async def server(websocket, _):
+    global hsv
     while True:
         _, frame = capture.read()
 
@@ -58,8 +61,8 @@ async def server(websocket, _):
         output = cv.warpPerspective(frame, warpMatrix, outputSize)
         if debug: cv.imshow('output', output)
 
-        filtered = cv.cvtColor(output, cv.COLOR_BGR2HSV)
-        filtered = cv.inRange(filtered, lowerRed, upperRed)
+        hsv = cv.cvtColor(output, cv.COLOR_BGR2HSV)
+        filtered = cv.inRange(hsv, lowerRed, upperRed)
         filtered = cv.dilate(filtered, kernel, iterations=1)
         filtered = cv.cvtColor(cv.bitwise_not(filtered), cv.COLOR_GRAY2BGR)
         keypoints = detector.detect(filtered)
